@@ -28,7 +28,7 @@ public:
 private:
     std::string name;
     std::vector<std::shared_ptr<Note>> notes;
-    std::vector<Observer*> observers;
+    std::list<Observer*> observers;
 };
 
 #endif
