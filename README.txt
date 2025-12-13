@@ -1,0 +1,1 @@
+Gestore di note in C++ con pattern Observer.
