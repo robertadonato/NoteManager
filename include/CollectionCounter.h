@@ -4,15 +4,16 @@
 #include "Observer.h"
 #include "Collection.h"
 #include <iostream>
+#include <memory>
 
 class CollectionCounter : public Observer {
 public:
-    explicit CollectionCounter(const Collection* collection);
+    explicit CollectionCounter(std::shared_ptr<Collection> collection);
 
     void update() override;
 
 private:
-    const Collection* collection;
+    std::weak_ptr<Collection> collection;
 };
 
 #endif

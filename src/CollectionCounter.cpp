@@ -1,11 +1,13 @@
 #include "CollectionCounter.h"
 
-CollectionCounter::CollectionCounter(const Collection* collection)
+CollectionCounter::CollectionCounter(std::shared_ptr<Collection> collection)
     : collection(collection) {
 }
 
 void CollectionCounter::update() {
-    std::cout << "[Counter] Collezione '" << collection->getName() 
-              << "' contiene ora " << collection->size() 
-              << " note" << std::endl;
+    if (auto coll = collection.lock()) {
+        std::cout << "[Counter] Collezione '" << coll->getName() 
+                << "' contiene ora " << coll->size() 
+                << " note" << std::endl;
+    }            
 }

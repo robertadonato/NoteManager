@@ -5,6 +5,8 @@
 #include "Note.h"
 #include <string>
 #include <vector>
+#include <memory>
+#include <list>
 
 class Collection : public Subject {
 public:
@@ -13,10 +15,10 @@ public:
 
     const std::string& getName() const;
 
-    virtual void addNote(Note* n);
-    virtual void removeNote(Note* n);
+    virtual void addNote(std::shared_ptr<Note> n);
+    virtual void removeNote(std::shared_ptr<Note> n);
 
-    const std::vector<Note*>& getNotes() const;
+    const std::vector<std::shared_ptr<Note>>& getNotes() const;
     int size() const;
 
     void addObserver(Observer* o) override;
@@ -25,7 +27,7 @@ public:
 
 private:
     std::string name;
-    std::vector<Note*> notes;
+    std::vector<std::shared_ptr<Note>> notes;
     std::vector<Observer*> observers;
 };
 

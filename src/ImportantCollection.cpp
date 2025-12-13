@@ -3,7 +3,7 @@
 
 ImportantCollection::ImportantCollection() : Collection("Important") {}
 
-void ImportantCollection::addNote(Note* n) {
+void ImportantCollection::addNote(std::shared_ptr<Note> n) {
     if (n == nullptr) {
         throw std::invalid_argument("Impossibile aggiungere una nota nulla");
     }

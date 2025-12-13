@@ -14,7 +14,7 @@ const std::string& Collection::getName() const {
     return name;
 }
 
-void Collection::addNote(Note* n) {
+void Collection::addNote(std::shared_ptr<Note> n) {
     if (n == nullptr) {
         throw std::invalid_argument("Impossibile aggiungere una nota nulla");
     }
@@ -28,7 +28,7 @@ void Collection::addNote(Note* n) {
     notifyObservers();
 }
 
-void Collection::removeNote(Note* n) {
+void Collection::removeNote(std::shared_ptr<Note> n) {
     if (n == nullptr) {
         throw std::invalid_argument("Impossibile rimuovere una nota nulla");
     }
@@ -46,7 +46,7 @@ void Collection::removeNote(Note* n) {
     notifyObservers();
 }
 
-const std::vector<Note*>& Collection::getNotes() const {
+const std::vector<std::shared_ptr<Note>>& Collection::getNotes() const {
     return notes;
 }
 

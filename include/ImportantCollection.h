@@ -7,7 +7,7 @@ class ImportantCollection : public Collection {
 public:
     ImportantCollection();
 
-    void addNote(Note* n) override;
+    void addNote(std::shared_ptr<Note> n) override;
 };
 
 #endif
