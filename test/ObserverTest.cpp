@@ -27,27 +27,20 @@ private:
 class ObserverTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        coll = new Collection("Test");
-        observer = new MockObserver();
-        note1 = new Note("Nota1", "Testo1");
-        note2 = new Note("Nota2", "Testo2");
+        coll = std::make_shared<Collection>("Test");
+        observer = std::make_shared<MockObserver>();
+        note1 = std::make_shared<Note>("Nota1", "Testo1");
+        note2 = std::make_shared<Note>("Nota2", "Testo2");
     }
     
-    void TearDown() override {
-        delete coll;
-        delete observer;
-        delete note1;
-        delete note2;
-    }
-    
-    Collection* coll;
-    MockObserver* observer;
-    Note* note1;
-    Note* note2;
+    std::shared_ptr<Collection> coll;
+    std::shared_ptr<MockObserver> observer;
+    std::shared_ptr<Note> note1;
+    std::shared_ptr<Note> note2;
 };
 
 TEST_F(ObserverTest, AddObserver) {
-    coll->addObserver(observer);
+    coll->addObserver(observer.get());
     
     coll->addNote(note1);
     
@@ -55,7 +48,7 @@ TEST_F(ObserverTest, AddObserver) {
 }
 
 TEST_F(ObserverTest, MultipleNotifications) {
-    coll->addObserver(observer);
+    coll->addObserver(observer.get());
     
     coll->addNote(note1);
     coll->addNote(note2);
@@ -65,11 +58,11 @@ TEST_F(ObserverTest, MultipleNotifications) {
 }
 
 TEST_F(ObserverTest, RemoveObserver) {
-    coll->addObserver(observer);
+    coll->addObserver(observer.get());
     coll->addNote(note1);
     
     observer->reset();
-    coll->removeObserver(observer);
+    coll->removeObserver(observer.get());
     
     coll->addNote(note2);
     
@@ -77,17 +70,15 @@ TEST_F(ObserverTest, RemoveObserver) {
 }
 
 TEST_F(ObserverTest, MultipleObservers) {
-    MockObserver* observer2 = new MockObserver();
+    auto observer2 = std::make_shared<MockObserver>();
     
-    coll->addObserver(observer);
-    coll->addObserver(observer2);
+    coll->addObserver(observer.get());
+    coll->addObserver(observer2.get());
     
     coll->addNote(note1);
     
     EXPECT_EQ(observer->getUpdateCount(), 1);
     EXPECT_EQ(observer2->getUpdateCount(), 1);
-    
-    delete observer2;
 }
 
 TEST_F(ObserverTest, NoNotificationWithoutObserver) {
@@ -96,14 +87,14 @@ TEST_F(ObserverTest, NoNotificationWithoutObserver) {
 }
 
 TEST(CollectionCounterTest, PrintsCorrectMessage) {
-    Collection coll("TestColl");
-    CollectionCounter counter(&coll);
-    coll.addObserver(&counter);
+    auto coll = std::make_shared<Collection>("TestColl");
+    auto counter = std::make_shared<CollectionCounter>(coll);
+    coll->addObserver(counter.get());
     
-    Note note("Test", "Contenuto");
+    auto note = std::make_shared<Note>("Test", "Contenuto");
 
     testing::internal::CaptureStdout();
-    coll.addNote(&note);
+    coll->addNote(note);
     std::string output = testing::internal::GetCapturedStdout();
     
     EXPECT_TRUE(output.find("TestColl") != std::string::npos);
@@ -112,15 +103,15 @@ TEST(CollectionCounterTest, PrintsCorrectMessage) {
 }
 
 TEST(CollectionCounterTest, UpdatesOnRemove) {
-    Collection coll("TestColl");
-    CollectionCounter counter(&coll);
-    coll.addObserver(&counter);
+    auto coll = std::make_shared<Collection>("TestColl");
+    auto counter = std::make_shared<CollectionCounter>(coll);
+    coll->addObserver(counter.get());
     
-    Note note("Test", "Contenuto");
-    coll.addNote(&note);
+    auto note = std::make_shared<Note>("Test", "Contenuto");
+    coll->addNote(note);
     
     testing::internal::CaptureStdout();
-    coll.removeNote(&note);
+    coll->removeNote(note);
     std::string output = testing::internal::GetCapturedStdout();
     
     EXPECT_TRUE(output.find("0") != std::string::npos);

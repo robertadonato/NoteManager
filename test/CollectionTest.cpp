@@ -1,38 +1,32 @@
 #include <gtest/gtest.h>
+#include <memory>
 #include "Collection.h"
 #include "Note.h"
 
 class CollectionTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        note1 = new Note("Nota1", "Testo1");
-        note2 = new Note("Nota2", "Testo2");
-        note3 = new Note("Nota3", "Testo3");
-        coll = new Collection("Nome collezione");
+        note1 = std::make_shared<Note>("Nota1", "Testo1");
+        note2 = std::make_shared<Note>("Nota2", "Testo2");
+        note3 = std::make_shared<Note>("Nota3", "Testo3");
+        coll = std::make_shared<Collection>("Nome collezione");
     }
     
-    void TearDown() override {
-        delete note1;
-        delete note2;
-        delete note3;
-        delete coll;
-    }
-    
-    Note* note1;
-    Note* note2;
-    Note* note3;
-    Collection* coll;
+    std::shared_ptr<Note> note1;
+    std::shared_ptr<Note> note2;
+    std::shared_ptr<Note> note3;
+    std::shared_ptr<Collection> coll;
 };
 
 TEST(CollectionConstructorTest, ValidName) {
-    Collection coll("Test");
-    EXPECT_EQ(coll.getName(), "Test");
-    EXPECT_EQ(coll.size(), 0);
+    auto coll = std::make_shared<Collection>("Test");
+    EXPECT_EQ(coll->getName(), "Test");
+    EXPECT_EQ(coll->size(), 0);
 }
 
 TEST(CollectionConstructorTest, EmptyName) {
     EXPECT_THROW(
-        Collection(""),
+        std::make_shared<Collection>(""),
         std::invalid_argument
     );
 }
@@ -105,7 +99,7 @@ TEST_F(CollectionTest, GetNotes) {
     coll->addNote(note1);
     coll->addNote(note2);
     
-    const std::vector<Note*>& notes = coll->getNotes();
+    const auto& notes = coll->getNotes();
     
     EXPECT_EQ(notes.size(), 2);
     EXPECT_EQ(notes[0], note1);

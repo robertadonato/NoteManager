@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <memory>
 #include "Note.h"
 #include "Collection.h"
 #include "ImportantCollection.h"
@@ -7,40 +8,31 @@
 class IntegrationTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        workColl = new Collection("Lavoro");
-        personalColl = new Collection("Personale");
-        importantColl = new ImportantCollection();
+        workColl = std::make_shared<Collection>("Lavoro");
+        personalColl = std::make_shared<Collection>("Personale");
+        importantColl = std::make_shared<ImportantCollection>();
         
-        workCounter = new CollectionCounter(workColl);
-        personalCounter = new CollectionCounter(personalColl);
-        importantCounter = new CollectionCounter(importantColl);
+        workCounter = std::make_shared<CollectionCounter>(workColl);
+        personalCounter = std::make_shared<CollectionCounter>(personalColl);
+        importantCounter = std::make_shared<CollectionCounter>(importantColl);
         
-        workColl->addObserver(workCounter);
-        personalColl->addObserver(personalCounter);
-        importantColl->addObserver(importantCounter);
+        workColl->addObserver(workCounter.get());
+        personalColl->addObserver(personalCounter.get());
+        importantColl->addObserver(importantCounter.get());
     }
     
-    void TearDown() override {
-        delete workColl;
-        delete personalColl;
-        delete importantColl;
-        delete workCounter;
-        delete personalCounter;
-        delete importantCounter;
-    }
-    
-    Collection* workColl;
-    Collection* personalColl;
-    ImportantCollection* importantColl;
-    CollectionCounter* workCounter;
-    CollectionCounter* personalCounter;
-    CollectionCounter* importantCounter;
+    std::shared_ptr<Collection> workColl;
+    std::shared_ptr<Collection> personalColl;
+    std::shared_ptr<ImportantCollection> importantColl;
+    std::shared_ptr<CollectionCounter> workCounter;
+    std::shared_ptr<CollectionCounter> personalCounter;
+    std::shared_ptr<CollectionCounter> importantCounter;
 };
 
 TEST_F(IntegrationTest, CompleteWorkflow) {
-    Note* meeting = new Note("Meeting", "Riunione alle 15:00");
-    Note* shopping = new Note("Spesa", "Latte, pane, uova");
-    Note* deadline = new Note("Deadline", "Consegnare progetto");
+    auto meeting = std::make_shared<Note>("Meeting", "Riunione alle 15:00");
+    auto shopping = std::make_shared<Note>("Spesa", "Latte, pane, uova");
+    auto deadline = std::make_shared<Note>("Deadline", "Consegnare progetto");
     
     workColl->addNote(meeting);
     workColl->addNote(deadline);
@@ -68,15 +60,11 @@ TEST_F(IntegrationTest, CompleteWorkflow) {
     
     EXPECT_EQ(workColl->size(), 1);
     EXPECT_EQ(importantColl->size(), 0);
-    
-    delete meeting;
-    delete shopping;
-    delete deadline;
 }
 
 TEST_F(IntegrationTest, ImportantCollectionOnlyAcceptsImportantNotes) {
-    Note* regular = new Note("Regular", "Nota normale");
-    Note* important = new Note("Important", "Nota importante");
+    auto regular = std::make_shared<Note>("Regular", "Nota normale");
+    auto important = std::make_shared<Note>("Important", "Nota importante");
     
     important->setImportant(true);
     
@@ -90,13 +78,10 @@ TEST_F(IntegrationTest, ImportantCollectionOnlyAcceptsImportantNotes) {
     );
     
     EXPECT_EQ(importantColl->size(), 1);
-    
-    delete regular;
-    delete important;
 }
 
 TEST_F(IntegrationTest, NoteInMultipleCollections) {
-    Note* sharedNote = new Note("Shared", "Nota condivisa");
+    auto sharedNote = std::make_shared<Note>("Shared", "Nota condivisa");
     
     workColl->addNote(sharedNote);
     personalColl->addNote(sharedNote);
@@ -108,12 +93,10 @@ TEST_F(IntegrationTest, NoteInMultipleCollections) {
     
     EXPECT_EQ(workColl->size(), 0);
     EXPECT_EQ(personalColl->size(), 1);
-    
-    delete sharedNote;
 }
 
 TEST_F(IntegrationTest, LockedNoteCannotBeModified) {
-    Note* note = new Note("Protected", "Contenuto protetto");
+    auto note = std::make_shared<Note>("Protected", "Contenuto protetto");
     workColl->addNote(note);
     
     note->lock();
@@ -135,29 +118,27 @@ TEST_F(IntegrationTest, LockedNoteCannotBeModified) {
     
     note->unlock();
     EXPECT_NO_THROW(note->setText("Nuovo testo"));
-    
-    delete note;
 }
 
 TEST(EdgeCaseTest, EmptyCollectionOperations) {
-    Collection coll("Empty");
-    Note note("Test", "Text");
+    auto coll = std::make_shared<Collection>("Empty");
+    auto note = std::make_shared<Note>("Test", "Text");
     
     EXPECT_THROW(
-        coll.removeNote(&note),
+        coll->removeNote(note),
         std::runtime_error
     );
     
-    EXPECT_EQ(coll.size(), 0);
+    EXPECT_EQ(coll->size(), 0);
 }
 
 TEST(EdgeCaseTest, AddRemoveAddSameNote) {
-    Collection coll("Test");
-    Note note("Test", "Text");
+    auto coll = std::make_shared<Collection>("Test");
+    auto note = std::make_shared<Note>("Test", "Text");
     
-    coll.addNote(&note);
-    coll.removeNote(&note);
-    coll.addNote(&note);
+    coll->addNote(note);
+    coll->removeNote(note);
+    coll->addNote(note);
     
-    EXPECT_EQ(coll.size(), 1);
+    EXPECT_EQ(coll->size(), 1);
 }
