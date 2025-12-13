@@ -11,6 +11,7 @@ set(HEADER_FILES
     include/CollectionCounter.h
     include/Subject.h
     include/Observer.h
+    include/NoteManager.h
 )
 
 set(SOURCE_FILES 
@@ -18,6 +19,7 @@ set(SOURCE_FILES
     src/Collection.cpp 
     src/ImportantCollection.cpp
     src/CollectionCounter.cpp
+    src/NoteManager.cpp
 )
 
 include_directories(include)

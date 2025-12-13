@@ -14,6 +14,7 @@ set(TEST_FILES
     CollectionTest.cpp
     ObserverTest.cpp
     IntegrationTest.cpp
+    NoteManagerTest.cpp
 )
 
 add_executable(RunAllTests ${TEST_FILES})
