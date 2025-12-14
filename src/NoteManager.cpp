@@ -325,30 +325,17 @@ std::vector<std::shared_ptr<Note>> NoteManager::filterByLocked(bool locked) cons
     return results;
 }
 
-std::vector<std::shared_ptr<Note>> NoteManager::filterByCollection(const std::string& collName) const {
-    std::vector<std::shared_ptr<Note>> results;
+std::vector<std::shared_ptr<Note>> NoteManager::filterByCollection(
+    const std::string& collName) const {
     
-    // Trova la collezione
-    std::shared_ptr<Collection> targetColl = nullptr;
     for (const auto& coll : collections) {
         if (coll->getName() == collName) {
-            targetColl = coll;
-            break;
+            // Restituisce direttamente il vector della collezione
+            return {coll->getNotes().begin(), coll->getNotes().end()};
         }
     }
     
-    if (!targetColl) {
-        std::cout << "Collezione '" << collName << "' non trovata.\n";
-        return results;
-    }
-    
-    // Ottieni tutte le note dalla collezione
-    const auto& notesInCollection = targetColl->getNotes();
-    
-    // Aggiungi le note ai risultati
-    for (const auto& note : notesInCollection) {
-        results.push_back(note);
-    }
-    
-    return results;
+    // Collezione non trovata
+    std::cout << "Collezione '" << collName << "' non trovata.\n";
+    return {};
 }
