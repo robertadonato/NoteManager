@@ -215,3 +215,85 @@ TEST(NoteManagerObserverTest, CounterNotifications) {
     EXPECT_TRUE(result.find("contiene ora 1 note") != std::string::npos);
     EXPECT_TRUE(result.find("contiene ora 2 note") != std::string::npos);
 }
+
+TEST(NoteManagerIntegrationTest, SearchByText) {
+    std::istringstream input(
+        "1\nShopping\nBuy milk and bread\nHome\n"
+        "1\nWorkNote\nMeeting at 10\nWork\n"
+        "9\nmilk\n"
+        "0\n"
+    );
+    std::ostringstream output;
+
+    std::streambuf* cinbuf = std::cin.rdbuf();
+    std::streambuf* coutbuf = std::cout.rdbuf();
+
+    std::cin.rdbuf(input.rdbuf());
+    std::cout.rdbuf(output.rdbuf());
+
+    NoteManager manager;
+    manager.run();
+
+    std::cin.rdbuf(cinbuf);
+    std::cout.rdbuf(coutbuf);
+
+    std::string result = output.str();
+
+    EXPECT_TRUE(result.find("Shopping") != std::string::npos);
+    EXPECT_TRUE(result.find("WorkNote") == std::string::npos);
+}
+
+TEST(NoteManagerIntegrationTest, FilterLockedNotes) {
+    std::istringstream input(
+        "1\nNote1\nText\nWork\n"
+        "1\nNote2\nText\nWork\n"
+        "4\nNote2\n"
+        "10\n1\n"
+        "0\n"
+    );
+    std::ostringstream output;
+
+    std::streambuf* cinbuf = std::cin.rdbuf();
+    std::streambuf* coutbuf = std::cout.rdbuf();
+
+    std::cin.rdbuf(input.rdbuf());
+    std::cout.rdbuf(output.rdbuf());
+
+    NoteManager manager;
+    manager.run();
+
+    std::cin.rdbuf(cinbuf);
+    std::cout.rdbuf(coutbuf);
+
+    std::string result = output.str();
+
+    EXPECT_TRUE(result.find("Note2") != std::string::npos);
+    EXPECT_TRUE(result.find("Note1") == std::string::npos);
+}
+
+TEST(NoteManagerIntegrationTest, FilterByCollection) {
+    std::istringstream input(
+        "1\nNoteA\nTextA\nWork\n"
+        "1\nNoteB\nTextB\nPersonal\n"
+        "11\nWork\n"
+        "0\n"
+    );
+    std::ostringstream output;
+
+    std::streambuf* cinbuf = std::cin.rdbuf();
+    std::streambuf* coutbuf = std::cout.rdbuf();
+
+    std::cin.rdbuf(input.rdbuf());
+    std::cout.rdbuf(output.rdbuf());
+
+    NoteManager manager;
+    manager.run();
+
+    std::cin.rdbuf(cinbuf);
+    std::cout.rdbuf(coutbuf);
+
+    std::string result = output.str();
+
+    EXPECT_TRUE(result.find("NoteA") != std::string::npos);
+    EXPECT_TRUE(result.find("NoteB") == std::string::npos);
+}

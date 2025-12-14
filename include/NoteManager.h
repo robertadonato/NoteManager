@@ -32,6 +32,15 @@ private:
     void handleDisplayAll() const;
     void handleDisplayCollection() const;
     void handleDisplayImportant() const;
+
+    void handleSearchByText() const;
+    void handleFilterByLocked() const;
+    void handleFilterByCollection() const;
+    void displayNotes(const std::vector<std::shared_ptr<Note>>& notes, const std::string& title) const;
+    
+    std::vector<std::shared_ptr<Note>> searchByText(const std::string& query) const;
+    std::vector<std::shared_ptr<Note>> filterByLocked(bool locked) const;
+    std::vector<std::shared_ptr<Note>> filterByCollection(const std::string& collName) const;
     
     std::shared_ptr<Collection> findOrCreateCollection(const std::string& name);
     std::shared_ptr<Note> findNoteByTitle(const std::string& title);

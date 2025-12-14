@@ -29,6 +29,9 @@ void NoteManager::run() {
                 case 6: handleDisplayAll(); break;
                 case 7: handleDisplayCollection(); break;
                 case 8: handleDisplayImportant(); break;
+                case 9: handleSearchByText(); break;
+                case 10: handleFilterByLocked(); break;
+                case 11: handleFilterByCollection(); break;
                 default:
                     std::cout << "Scelta non valida\n";
             }
@@ -48,6 +51,9 @@ void NoteManager::displayMenu() const {
     std::cout << "6. Visualizza tutte le note\n";
     std::cout << "7. Visualizza collezione\n";
     std::cout << "8. Visualizza note importanti\n";
+    std::cout << "9. Cerca note per testo\n";
+    std::cout << "10. Filtra note bloccate/sbloccate\n";
+    std::cout << "11. Filtra per collezione\n";
     std::cout << "0. Esci\n";
     std::cout << "Scelta: ";
 }
@@ -214,4 +220,135 @@ std::shared_ptr<Note> NoteManager::findNoteByTitle(const std::string& title) {
         }
     }
     return nullptr;
+}
+
+void NoteManager::handleSearchByText() const {
+    std::string query;
+    std::cout << "Testo da cercare: ";
+    std::getline(std::cin, query);
+    
+    auto results = searchByText(query);
+    displayNotes(results, "Risultati ricerca per: '" + query + "'");
+}
+
+void NoteManager::handleFilterByLocked() const {
+    int choice;
+    std::cout << "Filtra per:\n";
+    std::cout << "1. Note bloccate\n";
+    std::cout << "2. Note sbloccate\n";
+    std::cout << "Scelta: ";
+    std::cin >> choice;
+    std::cin.ignore();
+    
+    if (choice == 1) {
+        auto lockedNotes = filterByLocked(true);
+        displayNotes(lockedNotes, "Note bloccate");
+    } else if (choice == 2) {
+        auto unlockedNotes = filterByLocked(false);
+        displayNotes(unlockedNotes, "Note sbloccate");
+    } else {
+        std::cout << "Scelta non valida\n";
+    }
+}
+
+void NoteManager::handleFilterByCollection() const {
+    std::string collName;
+    std::cout << "Nome collezione: ";
+    std::getline(std::cin, collName);
+    
+    auto filteredNotes = filterByCollection(collName);
+    displayNotes(filteredNotes, "Note nella collezione: " + collName);
+}
+
+void NoteManager::displayNotes(const std::vector<std::shared_ptr<Note>>& notes, const std::string& title) const {
+    if (notes.empty()) {
+        std::cout << "\n=== " << title << " ===\n";
+        std::cout << "Nessuna nota trovata.\n";
+        return;
+    }
+    
+    std::cout << "\n=== " << title << " ===\n";
+    std::cout << "Trovate " << notes.size() << " note:\n";
+    
+    for (const auto& n : notes) {
+        std::cout << "\nTitolo: " << n->getTitle();
+        std::cout << "\nTesto: " << n->getText();
+        std::cout << "\nBloccata: " << (n->isLocked() ? "Si" : "No");
+        std::cout << "\nImportante: " << (n->isImportant() ? "Si" : "No");
+        std::cout << "\n---\n";
+    }
+}
+
+std::vector<std::shared_ptr<Note>> NoteManager::searchByText(const std::string& query) const {
+    std::vector<std::shared_ptr<Note>> results;
+    
+    if (query.empty()) {
+        return results;
+    }
+    
+    // Converti la query in lowercase per ricerca case-insensitive
+    std::string queryLower = query;
+    std::transform(queryLower.begin(), queryLower.end(), queryLower.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    
+    for (const auto& note : allNotes) {
+        std::string title = note->getTitle();
+        std::string text = note->getText();
+        
+        // Converti titolo e testo in lowercase
+        std::string titleLower = title;
+        std::string textLower = text;
+        std::transform(titleLower.begin(), titleLower.end(), titleLower.begin(),
+                       [](unsigned char c){ return std::tolower(c); });
+        std::transform(textLower.begin(), textLower.end(), textLower.begin(),
+                       [](unsigned char c){ return std::tolower(c); });
+        
+        // Cerca la query nel titolo o nel testo
+        if (titleLower.find(queryLower) != std::string::npos || 
+            textLower.find(queryLower) != std::string::npos) {
+            results.push_back(note);
+        }
+    }
+    
+    return results;
+}
+
+std::vector<std::shared_ptr<Note>> NoteManager::filterByLocked(bool locked) const {
+    std::vector<std::shared_ptr<Note>> results;
+    
+    for (const auto& note : allNotes) {
+        if (note->isLocked() == locked) {
+            results.push_back(note);
+        }
+    }
+    
+    return results;
+}
+
+std::vector<std::shared_ptr<Note>> NoteManager::filterByCollection(const std::string& collName) const {
+    std::vector<std::shared_ptr<Note>> results;
+    
+    // Trova la collezione
+    std::shared_ptr<Collection> targetColl = nullptr;
+    for (const auto& coll : collections) {
+        if (coll->getName() == collName) {
+            targetColl = coll;
+            break;
+        }
+    }
+    
+    if (!targetColl) {
+        std::cout << "Collezione '" << collName << "' non trovata.\n";
+        return results;
+    }
+    
+    // Ottieni tutte le note dalla collezione
+    const auto& notesInCollection = targetColl->getNotes();
+    
+    // Aggiungi le note ai risultati
+    for (const auto& note : notesInCollection) {
+        results.push_back(note);
+    }
+    
+    return results;
 }
